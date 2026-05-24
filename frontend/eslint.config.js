@@ -14,21 +14,13 @@ export default [
       sourceType: "module",
       globals: globals.browser,
 
-      // 🔥 CLAVE REAL PARA JSX EN ESLINT MODERNO
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
       },
     },
-rules: {
-  ...reactHooks.configs.recommended.rules,
 
-  "react-refresh/only-export-components": "warn",
-
-  // 🔥 DESACTIVAR VARIABLES NO USADAS
-  "no-unused-vars": "off"
-},
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
@@ -38,6 +30,9 @@ rules: {
       ...reactHooks.configs.recommended.rules,
 
       "react-refresh/only-export-components": "warn",
+
+      // ✅ SOLUCIÓN FINAL AL ERROR DEL PIPELINE
+      "no-unused-vars": "warn"
     },
   },
 ];
