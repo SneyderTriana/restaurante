@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
 
@@ -15,12 +19,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
 
       - name: Install dependencies
         run: npm install
 
-      - name: Lint
+      - name: Run Lint (CI SAFE)
         run: npm run lint:ci
+        continue-on-error: false
 
       - name: Build
         run: npm run build
