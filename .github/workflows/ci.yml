@@ -5,21 +5,32 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # Clonar repositorio
+      # =========================
+      # CLONAR REPOSITORIO
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Configurar Node.js compatible con Vite
+      # =========================
+      # CONFIGURAR NODE.JS
+      # =========================
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
       # =========================
       # BACKEND
@@ -35,20 +46,28 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      # Ejecutar ESLint
+      # =========================
+      # ESLINT
+      # =========================
       - name: Run frontend lint
         working-directory: ./frontend
         run: npm run lint
 
-      # Build del frontend
+      # =========================
+      # BUILD FRONTEND
+      # =========================
       - name: Build frontend
         working-directory: ./frontend
         run: npm run build
 
-      # Validar Docker Compose
-      - name: Docker Compose Validation
+      # =========================
+      # VALIDAR DOCKER COMPOSE
+      # =========================
+      - name: Validate Docker Compose
         run: docker compose config
 
-      # Mensaje final
+      # =========================
+      # PIPELINE EXITOSO
+      # =========================
       - name: Pipeline Success
         run: echo "CI/CD Pipeline ejecutado correctamente"
