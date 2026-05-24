@@ -17,5 +17,9 @@
     "clean": "docker-compose down -v && docker system prune -f",
     "seed": "cd backend && npm run seed",
     "migrate": "cd backend && npm run migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.0"
   }
 }

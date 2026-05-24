@@ -2,35 +2,53 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Clonar repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      # Configurar Node.js compatible con Vite
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-    - name: Install backend dependencies
-      working-directory: ./backend
-      run: npm install
+      # =========================
+      # BACKEND
+      # =========================
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
 
-    - name: Install frontend dependencies
-      working-directory: ./frontend
-      run: npm install
+      # =========================
+      # FRONTEND
+      # =========================
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
 
-    - name: Build frontend
-      working-directory: ./frontend
-      run: npm run build
+      # Ejecutar ESLint
+      - name: Run frontend lint
+        working-directory: ./frontend
+        run: npm run lint
 
-    - name: Docker Compose Validation
-      run: docker compose config
+      # Build del frontend
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
 
-    - name: Pipeline Success
-      run: echo "CI/CD Pipeline ejecutado correctamente"
+      # Validar Docker Compose
+      - name: Docker Compose Validation
+        run: docker compose config
+
+      # Mensaje final
+      - name: Pipeline Success
+        run: echo "CI/CD Pipeline ejecutado correctamente"
