@@ -10,10 +10,10 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend   # 🔥 CLAVE: todo corre dentro del frontend
+        working-directory: frontend   # 🔥 CLAVE
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run lint (CI SAFE)
+      - name: Run lint (CI)
         run: npm run lint:ci
 
       - name: Build project
