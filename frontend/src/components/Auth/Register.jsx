@@ -1,19 +1,18 @@
-// ✅ CORRECTO: Importaciones necesarias
-import { useState } from 'react';           // Solo useState, no React
-import { Link } from 'react-router-dom';    // Para navegación al login
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const Register = () => {
-  // ✅ Estado separado correctamente
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
-    phone: ''           // ✅ Sin confirmPassword
+    phone: ''
   });
-  const [confirmPassword, setConfirmPassword] = useState(''); // ✅ Separado
+
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
@@ -26,24 +25,96 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // ✅ Validación correcta
+
     if (formData.password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-    
+
     if (formData.password.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
     }
 
     setLoading(true);
-    await register(formData);  // ✅ Solo envía formData
-    setLoading(false);
+    try {
+      await register(formData);
+    } finally {
+      setLoading(false);
+    }
   };
 
- 
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="max-w-md w-full space-y-6">
+
+        <h2 className="text-3xl font-bold text-center">
+          Create Account
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          <input
+            name="firstName"
+            placeholder="First Name"
+            value={formData.firstName}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+
+          <input
+            name="lastName"
+            placeholder="Last Name"
+            value={formData.lastName}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white p-2 rounded"
+          >
+            {loading ? 'Creating...' : 'Register'}
+          </button>
+        </form>
+
+        <p className="text-center text-sm">
+          Already have an account?{' '}
+          <Link to="/login" className="text-blue-600">
+            Login
+          </Link>
+        </p>
+
+      </div>
+    </div>
+  );
 };
 
 export default Register;

@@ -1,12 +1,11 @@
-// Eliminado: import React from 'react'
-// Solo mantenemos los imports específicos que necesitamos
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { format } from 'date-fns';
-import { Calendar, ShoppingBag, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, ShoppingBag, CheckCircle } from 'lucide-react';
 
-// ✅ CORREGIDO: StatCard como función tradicional (en lugar de arrow function)
+/* ================= STAT CARD ================= */
+
 function StatCard({ title, value, icon: Icon, color }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
@@ -15,6 +14,7 @@ function StatCard({ title, value, icon: Icon, color }) {
           <p className="text-gray-500 text-sm font-medium">{title}</p>
           <p className="text-3xl font-bold mt-2 text-gray-900">{value}</p>
         </div>
+
         <div className={`p-3 rounded-full ${color}`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
@@ -23,22 +23,21 @@ function StatCard({ title, value, icon: Icon, color }) {
   );
 }
 
-/**
- * Dashboard component showing user statistics and recent activity
- * Fetches and displays reservations, orders, and metrics
- */
+/* ================= DASHBOARD ================= */
+
 const Dashboard = () => {
   const { user } = useAuth();
+
   const [stats, setStats] = useState({
     upcomingReservations: 0,
     activeOrders: 0,
     completedOrders: 0
   });
+
   const [recentReservations, setRecentReservations] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ CORREGIDO: fetchDashboardData definida ANTES de useEffect
   const fetchDashboardData = async () => {
     try {
       const [reservationsRes, ordersRes] = await Promise.all([
@@ -50,16 +49,17 @@ const Dashboard = () => {
       const orders = ordersRes.data.orders || [];
 
       const now = new Date();
-      const upcoming = reservations.filter(r => 
-        new Date(r.reservationDate) >= now && r.status !== 'cancelled'
+
+      const upcoming = reservations.filter(
+        r => new Date(r.reservationDate) >= now && r.status !== 'cancelled'
       );
-      
-      const activeOrders = orders.filter(o => 
-        ['pending', 'preparing'].includes(o.status)
+
+      const activeOrders = orders.filter(
+        o => ['pending', 'preparing'].includes(o.status)
       );
-      
-      const completedOrders = orders.filter(o => 
-        o.status === 'delivered'
+
+      const completedOrders = orders.filter(
+        o => o.status === 'delivered'
       );
 
       setStats({
@@ -77,7 +77,6 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ CORREGIDO: useEffect con la función definida fuera
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -85,21 +84,24 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Welcome back, {user?.firstName || 'Guest'}!
         </h1>
-        <p className="text-gray-600 mt-1">Here's what's happening with your account</p>
+        <p className="text-gray-600 mt-1">
+          Here's what's happening with your account
+        </p>
       </div>
 
-      {/* Stats Grid */}
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           title="Upcoming Reservations"
@@ -107,12 +109,14 @@ const Dashboard = () => {
           icon={Calendar}
           color="bg-blue-600"
         />
+
         <StatCard
           title="Active Orders"
           value={stats.activeOrders}
           icon={ShoppingBag}
           color="bg-green-600"
         />
+
         <StatCard
           title="Completed Orders"
           value={stats.completedOrders}
@@ -121,32 +125,34 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Recent Reservations */}
+      {/* RESERVATIONS */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Reservations</h2>
+        <div className="px-6 py-4 border-b bg-gray-50">
+          <h2 className="text-lg font-semibold">Recent Reservations</h2>
         </div>
-        <div className="divide-y divide-gray-200">
+
+        <div className="divide-y">
           {recentReservations.length === 0 ? (
             <div className="px-6 py-8 text-center text-gray-500">
               No upcoming reservations
             </div>
           ) : (
             recentReservations.map(reservation => (
-              <div key={reservation.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+              <div
+                key={reservation.id}
+                className="px-6 py-4 flex justify-between items-center hover:bg-gray-50"
+              >
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium">
                     {format(new Date(reservation.reservationDate), 'MMMM d, yyyy')}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {reservation.reservationTime} • {reservation.partySize} {reservation.partySize === 1 ? 'guest' : 'guests'}
+
+                  <p className="text-sm text-gray-600">
+                    {reservation.reservationTime} • {reservation.partySize} guests
                   </p>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  reservation.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                  reservation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
+
+                <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
                   {reservation.status}
                 </span>
               </div>
@@ -155,42 +161,39 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Orders */}
+      {/* ORDERS */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-900">Active Orders</h2>
+        <div className="px-6 py-4 border-b bg-gray-50">
+          <h2 className="text-lg font-semibold">Active Orders</h2>
         </div>
-        <div className="divide-y divide-gray-200">
+
+        <div className="divide-y">
           {recentOrders.length === 0 ? (
             <div className="px-6 py-8 text-center text-gray-500">
               No active orders
             </div>
           ) : (
             recentOrders.map(order => (
-              <div key={order.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="font-medium text-gray-900">Order #{order.id?.slice(0, 8)}</p>
-                  <span className="text-sm font-semibold text-gray-900">
-                    ${parseFloat(order.totalAmount || 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-gray-600">
-                    {order.items?.length || 0} item(s) • {order.orderType || 'dine-in'}
+              <div key={order.id} className="px-6 py-4">
+                <div className="flex justify-between">
+                  <p className="font-medium">
+                    Order #{order.id?.slice(0, 8)}
                   </p>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
-                    order.status === 'ready' ? 'bg-green-100 text-green-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {order.status}
-                  </span>
+
+                  <p className="font-semibold">
+                    ${parseFloat(order.totalAmount || 0).toFixed(2)}
+                  </p>
                 </div>
+
+                <p className="text-sm text-gray-600">
+                  {order.items?.length || 0} items
+                </p>
               </div>
             ))
           )}
         </div>
       </div>
+
     </div>
   );
 };
