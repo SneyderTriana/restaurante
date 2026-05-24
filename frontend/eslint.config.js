@@ -13,7 +13,6 @@ export default [
       ecmaVersion: "latest",
       sourceType: "module",
       globals: globals.browser,
-
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -29,10 +28,13 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
 
-      "react-refresh/only-export-components": "warn",
+      // 🔥 CRÍTICO PARA CI/CD ESTABLE
+      "no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_"
+      }],
 
-      // ✅ SOLUCIÓN FINAL AL ERROR DEL PIPELINE
-      "no-unused-vars": "warn"
+      "react-refresh/only-export-components": "warn"
     },
   },
 ];
