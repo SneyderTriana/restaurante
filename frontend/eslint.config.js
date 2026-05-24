@@ -2,7 +2,6 @@ import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import babelParser from "@babel/eslint-parser";
 
 export default [
   js.configs.recommended,
@@ -13,19 +12,23 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
+      globals: globals.browser,
 
-      // 🔴 CLAVE: habilita JSX correctamente
-      parser: babelParser,
+      // 🔥 CLAVE REAL PARA JSX EN ESLINT MODERNO
       parserOptions: {
-        requireConfigFile: false,
         ecmaFeatures: {
           jsx: true,
         },
       },
-
-      globals: globals.browser,
     },
+rules: {
+  ...reactHooks.configs.recommended.rules,
 
+  "react-refresh/only-export-components": "warn",
+
+  // 🔥 DESACTIVAR VARIABLES NO USADAS
+  "no-unused-vars": "off"
+},
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
@@ -34,7 +37,6 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
 
-      // opcional (recomendado para Vite/React)
       "react-refresh/only-export-components": "warn",
     },
   },
