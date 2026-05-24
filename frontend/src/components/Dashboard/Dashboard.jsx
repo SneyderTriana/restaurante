@@ -1,8 +1,27 @@
-import React, { useState, useEffect } from 'react';
+// Eliminado: import React from 'react'
+// Solo mantenemos los imports específicos que necesitamos
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import { format } from 'date-fns';
 import { Calendar, ShoppingBag, Clock, CheckCircle } from 'lucide-react';
+
+// ✅ CORREGIDO: StatCard como función tradicional (en lugar de arrow function)
+function StatCard({ title, value, icon: Icon, color }) {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-sm font-medium">{title}</p>
+          <p className="text-3xl font-bold mt-2 text-gray-900">{value}</p>
+        </div>
+        <div className={`p-3 rounded-full ${color}`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Dashboard component showing user statistics and recent activity
@@ -19,10 +38,7 @@ const Dashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
+  // ✅ CORREGIDO: fetchDashboardData definida ANTES de useEffect
   const fetchDashboardData = async () => {
     try {
       const [reservationsRes, ordersRes] = await Promise.all([
@@ -30,8 +46,8 @@ const Dashboard = () => {
         api.get('/orders/my')
       ]);
 
-      const reservations = reservationsRes.data.reservations;
-      const orders = ordersRes.data.orders;
+      const reservations = reservationsRes.data.reservations || [];
+      const orders = ordersRes.data.orders || [];
 
       const now = new Date();
       const upcoming = reservations.filter(r => 
@@ -61,19 +77,10 @@ const Dashboard = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }) => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 text-sm">{title}</p>
-          <p className="text-2xl font-bold mt-2">{value}</p>
-        </div>
-        <div className={`p-3 rounded-full ${color}`}>
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-      </div>
-    </div>
-  );
+  // ✅ CORREGIDO: useEffect con la función definida fuera
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   if (loading) {
     return (
@@ -87,7 +94,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user?.firstName}!
+          Welcome back, {user?.firstName || 'Guest'}!
         </h1>
         <p className="text-gray-600 mt-1">Here's what's happening with your account</p>
       </div>
@@ -116,8 +123,8 @@ const Dashboard = () => {
 
       {/* Recent Reservations */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Recent Reservations</h2>
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Reservations</h2>
         </div>
         <div className="divide-y divide-gray-200">
           {recentReservations.length === 0 ? (
@@ -126,16 +133,16 @@ const Dashboard = () => {
             </div>
           ) : (
             recentReservations.map(reservation => (
-              <div key={reservation.id} className="px-6 py-4 flex justify-between items-center">
+              <div key={reservation.id} className="px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                 <div>
-                  <p className="font-medium">
+                  <p className="font-medium text-gray-900">
                     {format(new Date(reservation.reservationDate), 'MMMM d, yyyy')}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    {reservation.reservationTime} • {reservation.partySize} guests
+                  <p className="text-sm text-gray-600 mt-1">
+                    {reservation.reservationTime} • {reservation.partySize} {reservation.partySize === 1 ? 'guest' : 'guests'}
                   </p>
                 </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   reservation.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                   reservation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                   'bg-red-100 text-red-800'
@@ -150,8 +157,8 @@ const Dashboard = () => {
 
       {/* Recent Orders */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Active Orders</h2>
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">Active Orders</h2>
         </div>
         <div className="divide-y divide-gray-200">
           {recentOrders.length === 0 ? (
@@ -160,18 +167,18 @@ const Dashboard = () => {
             </div>
           ) : (
             recentOrders.map(order => (
-              <div key={order.id} className="px-6 py-4">
+              <div key={order.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
-                  <span className="text-sm text-gray-600">
-                    ${parseFloat(order.totalAmount).toFixed(2)}
+                  <p className="font-medium text-gray-900">Order #{order.id?.slice(0, 8)}</p>
+                  <span className="text-sm font-semibold text-gray-900">
+                    ${parseFloat(order.totalAmount || 0).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-600">
-                    {order.items.length} item(s) • {order.orderType}
+                    {order.items?.length || 0} item(s) • {order.orderType || 'dine-in'}
                   </p>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
                     order.status === 'ready' ? 'bg-green-100 text-green-800' :
                     'bg-yellow-100 text-yellow-800'
